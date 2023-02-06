@@ -41,7 +41,6 @@ musllibc_setup_build_environment_with_sel4runtime()
 sel4_import_libsel4()
 util_libs_import_libraries()
 sel4_libs_import_libraries()
-
 # Setting LibNanopb On causes its libraries to be created when sel4_projects_libs_import_libraries
 # is called.
 set(LibNanopb ON CACHE BOOL "" FORCE)
@@ -88,3 +87,16 @@ target_compile_options(sel4test-driver PRIVATE -Werror -g)
 # Set this image as the rootserver
 include(rootserver)
 DeclareRootserver(sel4test-driver)
+
+# if(${sel4_arch} STREQUAL "loongarch64")
+# 	set_target_properties(sel4test-driver PROPERTIES  LINK_FLAGS " -z max-page-size=16384 ")
+# endif()
+
+# if(${sel4_arch} STREQUAL "loongarch64")
+#     set(linker_lds_path "${CMAKE_CURRENT_SOURCE_DIR}/sel4test-driver_loongarch.lds")
+#     set_target_properties(sel4test-driver PROPERTIES  LINK_FLAGS "-Wl,-T ${linker_lds_path} ")
+# endif()
+
+# if(${sel4_arch} STREQUAL "loongarch64")
+#     set_target_properties(sel4test-driver PROPERTIES  LINK_FLAGS " -Wall -Wl,--section-start=.init=0x10000 ")
+# endif()

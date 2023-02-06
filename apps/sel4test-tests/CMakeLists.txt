@@ -10,7 +10,7 @@ project(sel4test-tests C CXX)
 
 # Use arm arch source files on RISCV
 set(arch ${KernelArch})
-if(KernelArchRiscV)
+if(KernelArchRiscV OR KernelArchLoongarch)
     set(arch arm)
 endif()
 
@@ -57,3 +57,12 @@ target_link_libraries(
         sel4serialserver_tests
     PRIVATE sel4test-driver_Config
 )
+
+if(${sel4_arch} STREQUAL "loongarch64")
+    set(linker_lds_path "${CMAKE_CURRENT_SOURCE_DIR}/sel4test-tests_loongarch.lds")
+    set_target_properties(sel4test-tests PROPERTIES  LINK_FLAGS " -z max-page-size=16384 -Wl,-T ${linker_lds_path} ")
+endif()
+
+# if(${sel4_arch} STREQUAL "loongarch64")
+    # set_target_properties(sel4test-tests PROPERTIES  LINK_FLAGS " -z max-page-size=16384 -Wall -Wl,--section-start=.interp=0x100000 ")
+# endif()

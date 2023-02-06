@@ -164,40 +164,73 @@ test_incretype2(env_t env)
         test_error_eq(error, 0);
     }
 
+#ifdef CONFIG_ARCH_LOONGARCH 
+    /* And an untyped big enough to allocate 16 16-k pages into. */
+    error = vka_alloc_untyped(&env->vka, 18, &untyped);
+#else
     /* And an untyped big enough to allocate 16 4-k pages into. */
     error = vka_alloc_untyped(&env->vka, 16, &untyped);
+#endif
     test_error_eq(error, 0);
     test_assert(untyped.cptr != 0);
 
     /* Try allocating precisely 16 pages. These should all work. */
     int i;
     for (i = 0; i < 16; i++) {
+#ifdef CONFIG_ARCH_LOONGARCH 
+        error = seL4_Untyped_Retype(untyped.cptr,
+                                    seL4_ARCH_16KPage, 0,
+                                    env->cspace_root, env->cspace_root, seL4_WordBits,
+                                    slot[i], 1);
+#else
         error = seL4_Untyped_Retype(untyped.cptr,
                                     seL4_ARCH_4KPage, 0,
                                     env->cspace_root, env->cspace_root, seL4_WordBits,
                                     slot[i], 1);
+#endif
         test_error_eq(error, seL4_NoError);
     }
 
     /* An obscenely large allocation should fail (note that's 2^(2^20)). */
+#ifdef CONFIG_ARCH_LOONGARCH 
+    error = seL4_Untyped_Retype(untyped.cptr,
+                                seL4_ARCH_16KPage, 0,
+                                env->cspace_root, env->cspace_root, seL4_WordBits,
+                                slot[i], 4 * 1024 * 1024);
+#else
     error = seL4_Untyped_Retype(untyped.cptr,
                                 seL4_ARCH_4KPage, 0,
                                 env->cspace_root, env->cspace_root, seL4_WordBits,
                                 slot[i], 1024 * 1024);
+#endif
     test_error_eq(error, seL4_RangeError);
 
     /* Allocating to an existing slot should fail. */
+#ifdef CONFIG_ARCH_LOONGARCH 
+    error = seL4_Untyped_Retype(untyped.cptr,
+                                seL4_ARCH_16KPage, 0,
+                                env->cspace_root, env->cspace_root, seL4_WordBits,
+                                slot[0], 8);
+#else
     error = seL4_Untyped_Retype(untyped.cptr,
                                 seL4_ARCH_4KPage, 0,
                                 env->cspace_root, env->cspace_root, seL4_WordBits,
                                 slot[0], 8);
+#endif
     test_error_eq(error, seL4_DeleteFirst);
 
     /* Allocating another item should also fail as the untyped is full. */
+#ifdef CONFIG_ARCH_LOONGARCH
+    error = seL4_Untyped_Retype(untyped.cptr,
+                                seL4_ARCH_16KPage, 0,
+                                env->cspace_root, env->cspace_root, seL4_WordBits,
+                                slot[i++], 1);
+#else
     error = seL4_Untyped_Retype(untyped.cptr,
                                 seL4_ARCH_4KPage, 0,
                                 env->cspace_root, env->cspace_root, seL4_WordBits,
                                 slot[i++], 1);
+#endif
     test_error_eq(error, seL4_NotEnoughMemory);
 
     vka_free_object(&env->vka, &untyped);

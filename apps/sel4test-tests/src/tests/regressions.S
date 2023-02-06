@@ -329,6 +329,86 @@ test_registers:
 test_registers_fail:
     li a0, 1
     j reply_trampoline
+#elif defined(CONFIG_ARCH_LOONGARCH)
+/* Trampoline for providing the thread a valid stack before entering
+ * reply_to_parent. No jal required because reply_to_parent does not
+ * return.
+ */
+reply_trampoline:
+    la $a1, _safe_stack
+    move $sp, $a1
+    b reply_to_parent
+
+.global test_registers
+test_registers:
+
+    li.w $a0, 1
+    bne $ra, $a0, test_registers_fail
+    li.w $a0, 2
+    bne $sp, $a0, test_registers_fail
+    li.w $a0, 3
+    bne $s0, $a0, test_registers_fail
+    li.w $a0, 4
+    bne $s1, $a0, test_registers_fail
+    li.w $a0, 5
+    bne $s2, $a0, test_registers_fail
+    li.w $a0, 6
+    bne $s3, $a0, test_registers_fail
+    li.w $a0, 7
+    bne $s4, $a0, test_registers_fail
+    li.w $a0, 8
+    bne $s5, $a0, test_registers_fail
+    li.w $a0, 9
+    bne $s6, $a0, test_registers_fail
+    li.w $a0, 10
+    bne $s7, $a0, test_registers_fail
+    li.w $a0, 11
+    bne $s8, $a0, test_registers_fail
+    li.w $a0, 12
+    bne $fp, $a0, test_registers_fail
+    li.w $a0, 13
+    bne $a1, $a0, test_registers_fail
+    li.w $a0, 14
+    bne $a2, $a0, test_registers_fail
+    li.w $a0, 15
+    bne $a3, $a0, test_registers_fail
+    li.w $a0, 16
+    bne $a4, $a0, test_registers_fail
+    li.w $a0, 17
+    bne $a5, $a0, test_registers_fail
+    li.w $a0, 18
+    bne $a6, $a0, test_registers_fail
+    li.w $a0, 19
+    bne $a7, $a0, test_registers_fail
+    li.w $a0, 20
+    bne $t0, $a0, test_registers_fail
+    li.w $a0, 21
+    bne $t1, $a0, test_registers_fail
+    li.w $a0, 22
+    bne $t2, $a0, test_registers_fail
+    li.w $a0, 23
+    bne $t3, $a0, test_registers_fail
+    li.w $a0, 24
+    bne $t4, $a0, test_registers_fail
+    li.w $a0, 25
+    bne $t5, $a0, test_registers_fail
+    li.w $a0, 26
+    bne $t6, $a0, test_registers_fail
+    li.w $a0, 27
+    bne $t7, $a0, test_registers_fail
+    li.w $a0, 28
+    bne $t8, $a0, test_registers_fail
+
+    /* Return success. Note that we don't bother saving registers or bl because
+     * we're not planning to return here and we don't have a valid stack.
+     */
+    move $a0, $zero
+    b reply_trampoline
+
+    /* Return failure. */
+test_registers_fail:
+    li.w $a0, 1
+    b reply_trampoline
 
 #else
 #error Unsupported architecture

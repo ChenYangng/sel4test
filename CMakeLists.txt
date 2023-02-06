@@ -20,12 +20,15 @@ set(KernelRootCNodeSizeBits 13 CACHE INTERNAL "")
 
 # Set our custom domain schedule
 set(KernelDomainSchedule "${CMAKE_CURRENT_LIST_DIR}/domain_schedule.c" CACHE INTERNAL "")
+
 sel4_import_kernel()
 
-if((NOT Sel4testAllowSettingsOverride) AND (KernelArchARM OR KernelArchRiscV))
+if((NOT Sel4testAllowSettingsOverride) AND (KernelArchARM OR KernelArchRiscV OR KernelArchLoongarch))
     # Elfloader settings that correspond to how Data61 sets its boards up.
     ApplyData61ElfLoaderSettings(${KernelPlatform} ${KernelSel4Arch})
 endif()
+
+
 elfloader_import_project()
 
 add_subdirectory(apps/sel4test-driver)
